@@ -1,0 +1,145 @@
+<script>
+var CreditCard = function () {
+    
+    var creditLimit = 1000;
+    var apr = .35;
+    var balance = 0;
+    var interestOnBalance = 0;
+    var transactions = [{amount: 0, type:'created', date:'20150907'}];
+
+    return {
+        addDebitTransaction: function(charge, date){
+          var days = date - this.findLastTransactionDay();
+          this.calculateInterest(days);
+          balance = balance + charge;
+          this.addTransactions(charge, 'debit', date);
+          return "charges have been made to credit card"
+        },
+        addCreditTransaction: function(charge, date){
+          var days = date - this.findLastTransactionDay();
+          this.calculateInterest(days);
+          balance = balance - charge;
+          this.addTransactions(charge, 'credit', date);
+          return "payments have been added to creditcard"
+        },
+        getBalance: function(){
+          return Math.round(balance*100)/100;
+        },
+        getInterestOnBalance: function(){
+          return interestOnBalance;
+        },
+        getTransactions: function(){
+          return transactions;
+        },
+        getStatementBalance: function(){
+          if(balance == 0){return balance}  
+          else{return (balance + interestOnBalance);};
+        },
+        addTransactions: function (amount, type, date){
+          var newTransaction = {};
+          newTransaction['amount'] = amount;
+          newTransaction['type'] = type;
+          newTransaction['date'] = date; 
+          transactions.push(newTransaction);
+          delete newTransaction;
+          return "transactions added!"
+        },
+        calculateInterest: function(days){
+          var interest = (balance * apr/365 * days) + interestOnBalance;
+          interestOnBalance = Math.round((interest)*100)/100;
+          return interestOnBalance;
+        },
+        findLastTransactionDay:function(){
+          return transactions[transactions.length - 1].date;
+        }
+    };
+};
+</script> 
+
+<div style="width:100%;">
+<p>Create an implementation of the following:</p>
+
+<span>A line of credit product.  This is like a credit card except theres no card.</span>
+<span>It should work like this:</span>
+<ol>
+  <li>Have a built in APR and credit limit</li>
+  <li>Be able to draw ( take out money ) and make payments.</li>
+  <li>Keep track of principal balance and interest on the line of credit</li>
+  <li>APR Calculation based on the outstanding principal balance over real number of days.</li>
+  <li>Interest is not compounded, so it is only charged on outstanding principal.</li>
+  <li>Keep track of transactions such as payments and draws on the line and when
+    they occured.</li>
+  <li>30 day payment periods.  Basically what this means is that interest will not be
+    charged until the closing of a 30 day payment period.  However, when it is charged,
+    it should still be based on the principal balance over actual number of days outstanding
+    during the period, not just ending principal balance</li>
+</ol>
+
+<span>Couple of Scenarios how it would play out:</span>
+
+<h3>Scenario 1:</h3>
+
+<span>------------------------------------------------------------</span>
+
+<h5 style="color:red;">Using WEB CONSOLE</h5>
+<ol style="list-style-type: none;">
+<li>testOne = new CreditCard();</li>
+<li>***** simulating dates for simplicity ******</li>
+
+<!--
+    http://stackoverflow.com/questions/2627473/how-to-calculate-the-number-of-days-between-two-dates-using-javascript
+    logic for calculating days between dates JS
+    var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
+    var firstDate = new Date(2008,01,12);
+    var secondDate = new Date(2008,01,22);
+
+    var diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)));
+-->
+
+<li>testOne.addDebitTransaction(500,'20150907');</li>
+<li>***** simulating end of 30 billing cycle ******</li>
+<li>testOne.calculateInterest(30);</li>
+<li>***** 514.38 ******</li>
+<li>testOne.getStatementBalance();</li>
+<li>testOne.getTransactions();</li>
+</ol>
+
+<span>------------------------------------------------------------</span><br>
+
+<span>Someone creates a line of credit for 1000$ and 35% APR.</span>
+
+<p>He draws 500$ on day one so his remaining credit limit is 500$ and his balance is 500$.  
+He keeps the money drawn for 30 days.  He should owe 500$ * 0.35 / 365 * 30 = 14.38$ worth
+of interest on day 30.  Total payoff amount would be 514.38$</p>
+
+
+<h3>Scenario 2:</h3>
+
+<span>------------------------------------------------------------</span>
+
+<h5 style="color:red;">Using WEB CONSOLE</h5>
+<ol style="list-style-type: none;">
+<li>testTwo = new CreditCard()</li>
+<li>***** simulating dates for simplicity ******</li>
+<li>testTwo.addDebitTransaction(500,'20150907');</li>
+<li>testTwo.addCreditTransaction(200,'20150922');</li>
+<li>testTwo.addDebitTransaction(100,'20150932');</li>
+<li>***** simulating end of 30 day billing cycle ******</li>
+<li>testTwo.calculateInterest(5);</li>
+<li>***** 411.99 ******</li>
+<li>testTwo.getStatementBalance();</li>
+<li>testTwo.getTransactions();</li>
+</ol>
+
+<span>------------------------------------------------------------</span><br>
+
+
+<span>Someone creates a line of credit for 1000$ and 35% APR.</span>
+
+<p>He draws 500$ on day one so his remaining credit limit is 500$ and his balance is 500$.
+He pays back 200$ on day 15 and then draws another 100$ on day 25.  His total owed interest on
+day 30 should be 500 * 0.35 / 365 * 15 + 300 * 0.35 / 365 * 10 + 400 * 0.35 / 365 * 5  which is
+11.99.  Total payment should be 411.99.</p>
+<div>
+
+
