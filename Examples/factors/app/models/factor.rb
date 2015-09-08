@@ -20,7 +20,6 @@ class Factor
         return "no factors found" if array && array.size < 2
         # --> result hash
         factors = {}
-        array.uniq!
         # --> loop through data
         array.each do |index|
             next if index < 0
