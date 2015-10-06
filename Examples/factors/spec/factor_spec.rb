@@ -1,74 +1,57 @@
 require 'rails_helper'
 
 RSpec.describe Factor, :type => :model do
-    
-    factor = Factor.new
-    
-    context "Testing Base Cases" do
-        it 'should return no factors found []' do
-            results = factor.find_all_factors_in_array([])
-            expect(results).to eq('no factors found')
-        end
-        
-        it 'should return array required message []' do
-            results = factor.find_all_factors_in_array("random")
-            expect(results).to eq("parameter must be an array! ")
-        end
+
+  context "initialized with string" do
+    it 'should return error' do
+      expect{Factor.new('123')}.to raise_error(RuntimeError)
     end
-    
-    context "Testing Normal Output" do
-        
-        it 'should return correct hash [10, 5, 2, 20]' do
-            results = factor.find_all_factors_in_array([10, 5, 2, 20])
-            expect(results).to eq({10=>[5, 2], 5=>[], 2=>[], 20=>[10, 5, 2]})
-        end
-        
-        it 'should return correct hash [2, 5, 10, 20]' do
-            results = factor.find_all_factors_in_array([2, 5, 10, 20])
-            expect(results).to eq({2=>[], 5=>[], 10=>[2,5], 20=>[2,5,10]})
-        end
-        
-        it 'should return correct hash [20, 10, 5, 2]' do
-            results = factor.find_all_factors_in_array([20, 10, 5, 2])
-            expect(results).to eq({20=>[10,5,2], 10=>[5,2], 5=>[], 2=>[]})
-        end
-        
-        it 'should return correct hash without duplicates [10, 5, 2, 20, 5, 121, 120]]' do
-            results = factor.find_all_factors_in_array([10, 5, 2, 20, 5, 121, 120])
-            expect(results).to eq({10=>[5, 2], 5=>[], 2=>[], 20=>[10, 5, 2], 121=>[], 120=>[10, 5, 2, 20]})
-        end
-        
-        it 'should return correct hash filtering negative numbers [20, 10, 5, 2, -1,-12]' do
-            results = factor.find_all_factors_in_array([20, 10, 5, 2, -1,-12])
-            expect(results).to eq({20=>[10,5,2], 10=>[5,2], 5=>[], 2=>[]})
-        end
+  end
+
+  context "initialized with empty array" do
+    it 'should return error' do
+      expect{Factor.new([])}.to raise_error(RuntimeError)
     end
-    
-    context "Testing Reverse Output" do
-        it 'should return correct hash [10, 5, 2, 20]' do
-            results = factor.find_all_factors_in_array([10, 5, 2, 20], true)
-            expect(results).to eq({10=>[20], 5=>[10, 20], 2=>[10, 20], 20=>[]} )
-        end
-        
-        it 'should return correct hash [2, 5, 10, 20]' do
-            results = factor.find_all_factors_in_array([2, 5, 10, 20], true)
-            expect(results).to eq({2=>[10, 20], 5=>[10, 20], 10=>[20], 20=>[]})
-        end
-        
-        it 'should return correct hash [20, 10, 5, 2]' do
-            results = factor.find_all_factors_in_array([20, 10, 5, 2], true)
-            expect(results).to eq({20=>[], 10=>[20], 5=>[20, 10], 2=>[20, 10]})
-        end
-        
-        it 'should return correct hash without duplicates [10, 5, 2, 20, 5, 121, 120]' do
-            results = factor.find_all_factors_in_array([10, 5, 2, 20, 5, 121, 120], true)
-            expect(results).to eq({10=>[20, 120], 5=>[10, 20, 120], 2=>[10, 20, 120], 20=>[120], 121=>[], 120=>[]})
-        end
-        
-        it 'should return correct hash filtering negative numbers [20, 10, 5, 2, -1,-12]' do
-            results = factor.find_all_factors_in_array([20, 10, 5, 2, -1,-12], true)
-            expect(results).to eq({20=>[], 10=>[20], 5=>[20, 10], 2=>[20, 10]})
-        end
+  end
+
+  describe "Testing Normal Outputs for finding factors" do
+    let(:factor) {Factor.new([10, 5, 2, 20])}
+    context "testing the find_all_factors_in_array method" do
+      it 'should return correct values' do
+        factor.find_all_factors_in_array
+        expect(factor.factors).to eq({10=>[2,5], 5=>[], 2=>[], 20=>[2,5,10]})
+      end
     end
-    
+
+    context "testing the find_all_factors_in_array method" do
+      let(:factor) {Factor.new([10, 5, 2, 20, 5, 121, 120])}
+      it 'should return uniq correct values' do
+        factor.find_all_factors_in_array
+        expect(factor.factors).to eq({2=>[], 5=>[], 10=>[2, 5], 20=>[2, 5, 10], 120=>[2, 5, 10, 20], 121=>[]} )
+      end
+    end
+
+  end
+
+  describe "Testing Reverse Outputs for finding factors" do
+    let(:factor) {Factor.new([10, 5, 2, 20])}
+    context "testing the find_all_factors_in_array method" do
+      it 'should return correct values' do
+        factor.reverse = true
+        factor.find_all_factors_in_array
+        expect(factor.factors).to eq({10=>[20], 5=>[10, 20], 2=>[10, 20], 20=>[]})
+      end
+    end
+
+    context "testing the find_all_factors_in_array method" do
+      let(:factor) {Factor.new([10, 5, 2, 20, 5, 121, 120])}
+      it 'should return uniq correct values' do
+        factor.reverse = true
+        factor.find_all_factors_in_array
+        expect(factor.factors).to eq({2=>[10,20,120], 5=>[10, 20, 120], 10=>[20, 120], 20=>[120], 120=>[], 121=>[]} )
+      end
+    end
+
+  end
+
 end
